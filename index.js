@@ -9,7 +9,7 @@ import examRoutes from './routes/examRoutes.js';
 import subcategoryexam from './routes/subcategoryexamRoutes.js';
 import AdminRoutes from './routes/AdminRoutes.js';
 import MockTests from './routes/mocktestsRoutes.js';
-import router from './router/route.js';
+import router from './router/route.js'; // Ensure this path is correct
 
 dotenv.config();
 
