@@ -4,54 +4,43 @@ import dotenv from "dotenv";
 import cors from "cors";
 import morgan from "morgan";
 import mongoose from "mongoose";
+
+// Import route modules
 import userRoutes from './routes/userRoutes.js';
 import examRoutes from './routes/examRoutes.js';
-import subcategoryexam from './routes/subcategoryexamRoutes.js';
-import AdminRoutes from './routes/AdminRoutes.js';
-import MockTests from './routes/mocktestsRoutes.js';
-import router from './router/route.js'; // Ensure this path is correct
+import subcategoryExamRoutes from './routes/subcategoryexamRoutes.js';
+import adminRoutes from './routes/AdminRoutes.js';
+import mockTestsRoutes from './routes/mocktestsRoutes.js';
+import generalRoutes from './router/route.js'; // Ensure this path is correct
 
 dotenv.config();
 
 const app = express();
-const port = process.env.port || 8080;
+const port = process.env.PORT || 8080; // Use PORT in uppercase for environment variables
 const mongodbURI = process.env.MONGOOSE_URI;
-const server = app.listen(port, () => {
-    console.log('server is up on port', port)
-})
+
+// Middleware setup
+app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(morgan('dev')); // Log HTTP requests for better debugging
+
+// Database configuration
+mongoose.connect(mongodbURI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log("MongoDB Successfully Connected"))
+    .catch(err => console.error("MongoDB connection error:", err));
 
 // Load Routes
-
-
-
-
-// Database configuration and server startup
-// Database configuration
-mongoose.connect(mongodbURI)
-    .then(() => console.log("MongoDB Successfully Connected"))
-    .catch(err => console.log(err));
-
-app.use(cors());
-app.use(
-    bodyParser.urlencoded({
-        extended: true
-    })
-)
-app.use(bodyParser.json());
-
-
-
 app.use("/api/user", userRoutes);
-app.use("/api/admin", AdminRoutes);
+app.use("/api/admin", adminRoutes);
 app.use('/api/exam', examRoutes);
-app.use('/api/subcategory', subcategoryexam);
-app.use('/api/mocktest', MockTests);
-app.use('/api', router);
-
+app.use('/api/subcategory', subcategoryExamRoutes);
+app.use('/api/mocktest', mockTestsRoutes);
+app.use('/api', generalRoutes);
 
 // Root route
 app.get('/', (req, res) => {
-    res.status(201).json("GET request");
+    res.status(200).json("GET request successful");
 });
 
 // Error handling middleware
@@ -59,5 +48,11 @@ app.use((err, req, res, next) => {
     if (res.headersSent) {
         return next(err);
     }
+    console.error(err.stack); // Log the error stack for debugging
     res.status(500).send({ message: 'Something went wrong!' });
+});
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server is up on port ${port}`);
 });
